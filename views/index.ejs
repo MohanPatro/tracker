@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance Tracker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .container {
+            margin-top: 30px;
+        }
+        .tabcontent {
+            display: none;
+        }
+    </style>
+    <script>
+        function recordAttendance(event) {
+            if (event.keyCode === 13) {
+                var rollNo = document.getElementById("rollNo").value;
+                var status = document.getElementById("status").value;
+                var reason = document.getElementById("reason").value;
+                var timestamp = new Date().toLocaleString();
+
+                if (status === "present") {
+                    var presentTable = document.getElementById("presentTable");
+                    var row = presentTable.insertRow(-1);
+                    var cell1 = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+                    cell1.innerHTML = rollNo;
+                    cell2.innerHTML = timestamp;
+                } else if (status === "absent") {
+                    if (reason.trim() === "") {
+                        alert("Please provide a reason for absence.");
+                        return;
+                    }
+                    var absentTable = document.getElementById("absentTable");
+                    var row = absentTable.insertRow(-1);
+                    var cell1 = row.insertCell(0);
+                    var cell2 = row.insertCell(1);
+                    cell1.innerHTML = rollNo;
+                    cell2.innerHTML = reason;
+                }
+
+                document.getElementById("rollNo").value = "";
+                document.getElementById("status").value = "present";
+                document.getElementById("reason").value = "";
+            }
+        }
+
+        function openTab(tabName) {
+            var tabContents = document.getElementsByClassName("tabcontent");
+            var tabLinks = document.getElementsByClassName("tablinks");
+            for (var i = 0; i < tabContents.length; i++) {
+                tabContents[i].style.display = "none";
+            }
+            for (var i = 0; i < tabLinks.length; i++) {
+                tabLinks[i].classList.remove("active");
+            }
+            document.getElementById(tabName).style.display = "block";
+            event.currentTarget.classList.add("active");
+        }
+
+        document.querySelector(".text-center").addEventListener("click", function(e) {
+            if (e.target.classList.contains("tablinks")) {
+                var tabName = e.target.getAttribute("onclick").match(/'([^']+)'/)[1];
+                openTab(tabName);
+            }
+        });
+
+        function toggleReasonField() {
+            var status = document.getElementById("status").value;
+            var reasonField = document.getElementById("reason");
+
+            if (status === "absent") {
+                reasonField.required = true;
+                reasonField.disabled = false;
+            } else {
+                reasonField.required = false;
+                reasonField.disabled = true;
+                reasonField.value = "";
+            }
+        }
+
+        function setCurrentDate() {
+            var currentDate = new Date();
+            var day = currentDate.getDate();
+            var month = currentDate.getMonth() + 1; 
+            var year = currentDate.getFullYear();
+
+            var formattedDate = year + "-" + (month < 10 ? "0" + month : month) + "-" + (day < 10 ? "0" + day : day);
+
+
+            document.getElementById("dateInput").value = formattedDate;
+        }
+
+
+        function updateCurrentTime() {
+            setInterval(function() {
+                var currentTime = new Date();
+                var hours = currentTime.getHours();
+                var minutes = currentTime.getMinutes();
+                var seconds = currentTime.getSeconds();
+
+                var formattedTime = (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes) + ":" + (seconds < 10 ? "0" + seconds : seconds);
+
+
+                document.getElementById("timeInput").value = formattedTime;
+            }, 1000); 
+        }
+    </script>
+</head>
+<body onload="setCurrentDate(),updateCurrentTime()">
+    <div class="container">
+        <h1 class="text-center">Attendance Tracker</h1>
+        <form action="/postAttendence" method="post">
+
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="rollNo">Roll Number:</label>
+                    <input type="text" id="roll" name="roll" class="form-control" onkeydown="recordAttendance(event)">
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="status">Status:</label>
+                    <select id="status" name="status" class="form-control" onchange="toggleReasonField()">
+                        <option value="present">Present</option>
+                        <option value="absent">Absent</option>
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="dateInput">Date:</label>
+                    <input type="date" id="dateInput" name="Date" readonly><br><br>
+            
+                    
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="timeInput">Time:</label><br>
+                    <input type="time" id="timeInput" name="Time" readonly><br><br>
+                    
+                </div>
+            </div>
+           
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label for="reason">Reason (if absent):</label>
+                    <input type="text" id="reason" name="reason" class="form-control" required disabled onkeydown="recordAttendance(event)">
+                </div>
+            </div>
+        </div>
+            <div class="text-center">
+            <button onclick="recordAttendance(event)" class="btn btn-primary">Submit</button>
+        </div>
+        </form>
+
+        
+
+        <div class="text-center mt-4">
+            <button class="btn btn-secondary tablinks" onclick="openTab('presentTab')">Present</button>
+            <button class="btn btn-secondary tablinks" onclick="openTab('absentTab')">Absent</button>
+        </div>
+
+        <div id="presentTab" class="tabcontent">
+            <h2 class="text-center mt-4">Present Students</h2>
+            <table id="presentTable" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Roll Number</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (present.length>0) { %>
+                        
+                            <% present.forEach(student => { %>
+                                <tr>
+                                    <td><%= student.roll %></td>
+                                    <td><%= student.Time %></td>
+                                </tr>
+                               
+                            <% }) %>
+                        
+                        
+                    <% } %>
+                    
+                </tbody>
+            </table>
+        </div>
+
+        <div id="absentTab" class="tabcontent">
+            <h2 class="text-center mt-4">Absent Students</h2>
+            <table id="absentTable" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Roll Number</th>
+                        <th>Reason</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (absent.length>0) { %>
+                        
+                       
+                            <% absent.forEach(student => { %>
+                                <tr>
+                                    <td><%= student.roll %></td>
+                                    <td><%= student.reason %></td>
+                                </tr>
+                               
+                            <% }) %>
+                      
+                        
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script>
+            openTab("presentTab");
+        </script>
+    </div>
+</body>
+</html>
