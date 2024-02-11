@@ -38,6 +38,6 @@ const Student=sequelize.define('student',{
     freezeTableName:true
 })
 
-// Student.sync({alter:true})
+ Student.sync({alter:true})
 
 module.exports={sequelize,Sequelize,Student};
